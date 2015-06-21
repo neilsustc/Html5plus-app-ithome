@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link href="css/font-awesome.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.part.css" />
+		<style type="text/css">
+			body {
+				margin: 15px;
+			}
+			p {
+				line-height: 140%;
+				color: #444444;
+			}
+			.post-title {
+				margin: 0;
+				font-size: 1.5em;
+				color: black;
+				line-height: 100%;
+			}
+			.post-title-info {
+				font-size: 0.9em;
+				color: #666666;
+			}
+			#loading {
+				color: rgb(210, 34, 34);
+			}
+			/*comments style*/
+			
+			#loadCommsBtn {
+				color: white;
+				background: rgb(210, 34, 34);
+				padding: 10px;
+				text-align: center;
+				border-radius: 5px;
+			}
+			ul {
+				list-style-type: none;
+				padding: 0;
+				margin: 0;
+			}
+			ul span {
+				margin-left: 10px;
+			}
+			ul li {
+				margin-bottom: 15px;
+				border: 1px solid rgb(200, 200, 200);
+				border-radius: 5px;
+			}
+			ul li p {
+				margin: 0;
+			}
+			ul .info {
+				padding: 15px;
+			}
+			ul .comm {
+				padding: 15px;
+				background: rgb(245, 245, 245);
+			}
+			li ul {
+				margin: 15px 15px 0 15px;
+			}
+			li ul span {
+				margin-left: 10px;
+			}
+			li ul li {
+				margin-bottom: 15px;
+				border: 1px solid rgb(200, 200, 200);
+				border-radius: 5px;
+			}
+			li ul li p {
+				margin: 0;
+			}
+			li ul .re_info {
+				padding: 15px;
+			}
+			li ul .re_comm {
+				padding: 15px;
+				background: rgb(245, 245, 245);
+			}
+			.info span.mobile {
+				margin: 0;
+				margin-right: 10px;
+			}
+			.re_info span.mobile {
+				margin: 0;
+				margin-right: 10px;
+			}
+			.entry > p {
+				padding: 15px;
+				background: rgb(245, 245, 245);
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="loading">
+			<i class="icon-spinner icon-spin icon-2x"></i>
+		</div>
+		<div id="content"></div>
+		<script src="js/mui.min.js"></script>
+		<script>
+			mui.init();
+			mui.plusReady(ready);
+
+			function ready() {
+				getNews();
+			}
+
+			function getNews() {
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4) {
+						if (xmlhttp.status == 200) {
+							var textResponse = xmlhttp.responseText;
+							textResponse = textResponse.replace(/[\s]+/ig, " "); // spaces
+							textResponse = textResponse.replace(/<script\b[^>]*>[\s\S]*?<\/script>/ig, ""); // js
+							var titleHtml = extractNodeValue(textResponse, '<div class="post_title">', '</div>');
+							var contentHtml = extractNodeValue(textResponse, '<div class="post_content" id="paragraph">', '</div>')
+								/* */
+							var divTitle = document.createElement("div");
+							divTitle.className = "callout";
+							var pTitle = document.createElement("p");
+							pTitle.className = "post-title";
+							pTitle.innerHTML = extractNodeValue(titleHtml, "<h1>", "</h1>");
+							var divInfo = document.createElement("div");
+							var spanTitleInfo = document.createElement("span");
+							var titleInfo = extractNodeValue(titleHtml, '<span class="pt_info pre1">', '</span> </a></span>') + '</span></a>';
+							spanTitleInfo.innerHTML = titleInfo.replace(/<a href="#commentDiv"[^>]*>((?!<\/a>)[\s\S])+<\/a>/ig, ""); // comments counts
+							spanTitleInfo.className = "post-title-info";
+							var hr = document.createElement("hr");
+							//
+							var divContent = document.createElement("div");
+							divContent.innerHTML = renderImgs(contentHtml);
+							// var spanSource = document.createElement("span");
+							// var spanAuthor = document.createElement("span");
+							//
+							var divComments = document.createElement("div");
+							divComments.id = "divComms";
+							var divLoadComms = document.createElement("div");
+							divLoadComms.id = "loadCommsBtn";
+							divLoadComms.className = "pressable";
+							divLoadComms.innerHTML = "<span>加载评论<span>";
+							//
+							//
+							divTitle.appendChild(pTitle);
+							divInfo.appendChild(spanTitleInfo);
+							divComments.appendChild(divLoadComms);
+							document.getElementById("content").appendChild(divTitle);
+							document.getElementById("content").appendChild(divInfo);
+							document.getElementById("content").appendChild(hr);
+							document.getElementById("content").appendChild(divContent);
+							document.getElementById("content").appendChild(divComments);
+							//
+							document.body.removeChild(document.getElementById("loading"));
+							//
+							if (plus.storage.getItem("loadComms") == "true") {
+								getComms();
+							}
+							document.getElementById("loadCommsBtn").addEventListener('tap', function() {
+								this.innerHTML += "&nbsp;<i class='icon-spinner icon-spin' id='loadCommsIcon'></i>";
+								getComms();
+							});
+						} else {
+							mui.toast('网络似乎有问题');
+						}
+						xmlhttp.abort();
+					}
+				}
+				xmlhttp.open("GET", "http://wap.ithome.com/html/" + plus.webview.currentWebview().newsId + ".htm", true);
+				xmlhttp.send();
+			}
+
+			function getComms() {
+				var xmlhttp = new XMLHttpRequest();
+				var divComms = document.getElementById("divComms");
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4) {
+						if (xmlhttp.status == 200) {
+							var xmlDoc = xmlhttp.responseText;
+							var escapedS = xmlDoc.slice(xmlDoc.indexOf("unescape('") + 10, xmlDoc.length).trim();
+							escapedS = escapedS.slice(0, escapedS.length - 2);
+							var commentsListHtml = unescape(escapedS);
+							divComms.innerHTML = renderComms(commentsListHtml);
+							if (document.getElementById("loadCommsBtn"))
+								divComms.removeChild(document.getElementById("loadCommsBtn"));
+						} else {
+							mui.toast('网络似乎有问题');
+						}
+						xmlhttp.abort();
+					}
+				}
+				var id = plus.webview.currentWebview().newsId;
+				console.log(id);
+				xmlhttp.open("GET", "http://www.ithome.com/ithome/CommentCount.aspx?newsid=" + id + "&metro=1", true);
+				xmlhttp.send();
+			}
+
+			function extractNodeValue(contentText, startString, endString) {
+				var value = "";
+				if (contentText.indexOf(startString) != -1) {
+					// console.log('find start string: ' + startString + ' at ' + contentText.indexOf(startString));
+					var start = contentText.indexOf(startString);
+					temp = contentText.slice(start + startString.length, contentText.length);
+					if (contentText.indexOf(endString) != -1) {
+						// console.log('find end string: ' + endString + ' at ' + contentText.indexOf(endString));
+						var end = temp.indexOf(endString);
+						value = temp.slice(0, end).trim();
+					}
+				}
+				return value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/ig, "").trim();
+			}
+
+			function renderImgs(contentHtml) {
+				var renderred = "";
+				while (contentHtml.indexOf("<img") != -1) {
+					renderred += contentHtml.slice(0, contentHtml.indexOf("<img") + 1);
+					contentHtml = contentHtml.slice(contentHtml.indexOf("<img") + 1, contentHtml.length);
+					var imgAttrs = contentHtml.slice(0, contentHtml.indexOf(">") - 1) + " width=\"100%\"";
+					imgAttrs = imgAttrs.replace(/class="lazy"\ssrc="http:\/\/img.ithome.com\/images\/v2\/grey.gif"\sdata-original/ig, "src");
+					renderred += (imgAttrs);
+				}
+				renderred += contentHtml.slice(contentHtml.indexOf(">") - 1, contentHtml.length);
+				return renderred;
+			}
+
+			function renderComms(commsHtml) {
+				var renderred = commsHtml;
+				renderred = renderred.replace(/<span class="icon2"><\/span>/ig, "").trim();
+				renderred = renderred.replace(/<img[^>]*>/ig, "").trim(); //header icon
+				renderred = renderred.replace(/<div class="zhiChi">((?!div)[\s\S])+<\/div>/ig, "").trim();
+				renderred = renderred.replace(/<div class="more_comm">((?!div)[\s\S])+<\/div>/ig, "").trim();
+				renderred = renderred.replace(/<a[^>]*>/ig, "<span style=\"color: dodgerblue;\">").trim();
+				renderred = renderred.replace(/<\/a>/ig, "</span>").trim();
+				renderred = renderred.replace(/[\s]+/ig, " ");
+				return renderred;
+			}
+		</script>
+	</body>
+
+</html>

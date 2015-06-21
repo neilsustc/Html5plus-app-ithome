@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<!--<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />-->
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.part.css" />
+		<link href="css/font-awesome.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="navbar">
+			<div class="nav-btn-style" id="menu">
+				<i class="icon-reorder" style="margin: 0 15px;"></i>
+			</div>
+			<span>IT之家</span>
+			<div class="nav-btn-style float-right" id="setting">
+				<span style="margin: 0 15px;"><i class="icon-cog"></i></span>
+			</div>
+		</header>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init({
+				subpages: [{
+					id: 'newsList',
+					url: 'newsList.html',
+					styles: {
+						top: '50px',
+						bottom: 0,
+						bounce: 'vertical'
+					}
+				}]
+			});
+			 //首页返回键处理
+			 //处理逻辑：1秒内，连续两次按返回键，则退出应用；
+			var first = null;
+			mui.back = function() {
+				//首次按键，提示‘再按一次退出应用’
+				if (!first) {
+					first = new Date().getTime();
+					mui.toast('再按一次退出应用');
+					setTimeout(function() {
+						first = null;
+					}, 1000);
+				} else {
+					if (new Date().getTime() - first < 1000) {
+						plus.runtime.quit();
+					}
+				}
+			};
+			mui.menu = menuAction;
+			document.getElementById("menu").addEventListener('tap', menuAction);
+			/* settings listener */
+			document.getElementById("setting").addEventListener('tap', openSettings);
+
+			function menuAction() {
+				var btnArray = [{
+					title: "设置"
+				}, {
+					title: "退出"
+				}];
+				plus.nativeUI.actionSheet({
+					cancel: "取消",
+					buttons: btnArray
+				}, function(e) {
+					var index = e.index;
+					switch (index) {
+						case 0:
+							break;
+						case 1:
+							openSettings();
+							break;
+						case 2:
+							plus.runtime.quit();
+							break;
+					}
+				});
+			}
+
+			function openSettings() {
+				mui.openWindow({
+					id: 'settings',
+					url: 'settingsHeader.html',
+					show: {
+						duration: 200
+					},
+					waiting: {
+						autoShow: false
+					}
+				});
+			}
+		</script>
+	</body>
+
+</html>

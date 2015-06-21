@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!--<link rel="stylesheet" type="text/css" href="css/mui.min.css" />-->
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.part.css" />
+		<style type="text/css">
+			body {
+				margin: 0;
+				background: rgb(250, 250, 250);
+			}
+			.ul-title {
+				margin: 15px 0 5px 15px;
+				color: rgb(180, 180, 180);
+			}
+			.list-group-item {
+				border-left: 0;
+				border-right: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<p class="ul-title">账号与安全</p>
+		<ul class="list-group">
+			<li class="list-group-item" id="account">
+				<span>账号</span>
+			</li>
+			<li class="list-group-item" id="collection">
+				<span>我的收藏</span>
+			</li>
+			<li class="list-group-item" id="comments">
+				<span>评论管理</span>
+			</li>
+		</ul>
+		<p class="ul-title">阅读设置</p>
+		<ul class="list-group">
+			<li class="list-group-item" id="fontSize">
+				<span>字体大小</span>
+			</li>
+			<li class="list-group-item">
+				<span style="line-height: 30px;">自动加载评论</span>
+				<div class="switch float-right" id="loadComms">
+					<div class="switch-handle"></div>
+				</div>
+			</li>
+		</ul>
+		<p class="ul-title">辅助功能</p>
+		<ul class="list-group">
+			<li class="list-group-item">
+				<span style="line-height: 30px;">夜间模式</span>
+				<div class="switch float-right" id="nightMode">
+					<div class="switch-handle"></div>
+				</div>
+			</li>
+			<li class="list-group-item">
+				<span style="line-height: 30px;">无图模式</span>
+				<div class="switch float-right" id="noPicsMode">
+					<div class="switch-handle"></div>
+				</div>
+			</li>
+			<!--<li class="list-group-item">
+				<span style="line-height: 30px;">显示摘要</span>
+				<div class="switch float-right" id="showAbs">
+					<div class="switch-handle"></div>
+				</div>
+			</li>-->
+		</ul>
+		<ul class="list-group">
+			<li class="list-group-item pressable" id="about">
+				<span>关于</span>
+				<i class="icon-angle-right float-right"></i>
+			</li>
+		</ul>
+		<script src="js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function() {
+				// switches listeners
+				var switches = document.getElementsByClassName("switch");
+				for (i = 0; i < switches.length; i++) {
+					var initShowAbs = plus.storage.getItem("showAbs");
+					if (initShowAbs != "true" && initShowAbs != "false") {
+						plus.storage.setItem("showAbs", "true");
+					}
+					// init switches
+					if (plus.storage.getItem(switches[i].id) == "true") {
+						switches[i].classList.add("switch-on");
+					} else if (plus.storage.getItem(switches[i].id) == "false") {
+						switches[i].classList.remove("switch-on");
+					}
+					switches[i].addEventListener('tap', function() {
+						// animation
+						if (this.classList.contains("switch-on")) {
+							this.classList.remove("switch-on");
+						} else {
+							this.classList.add("switch-on");
+						}
+						// function
+						switch (this.id) {
+							case "loadComms":
+								if (this.classList.contains("switch-on")) {
+									plus.storage.setItem("loadComms", "true");
+								} else {
+									plus.storage.setItem("loadComms", "false");
+								}
+								mui.toast('总算有用了');
+								break;
+							case "nightMode":
+								mui.toast('然而目前并没有什么*用');
+								break;
+							case "noPicsMode":
+								mui.toast('然而目前并没有什么*用');
+								break;
+								/*case "showAbs":
+									if (this.classList.contains("switch-on")) {
+										plus.storage.setItem("showAbs", "true");
+									} else {
+										plus.storage.setItem("showAbs", "false");
+									}
+									mui.toast('这个真有用');*/
+								break;
+							default:
+								break;
+						}
+						mui.fire(plus.webview.getWebviewById("newsList"), 'settingsChange');
+					});
+				}
+				//
+				document.getElementById("account").addEventListener('tap', function() {
+					mui.toast("并没有数据源\t\tT^T");
+				});
+				//
+				document.getElementById("collection").addEventListener('tap', function() {
+					mui.toast("也没有数据源\t\tT^T");
+				});
+				//
+				document.getElementById("comments").addEventListener('tap', function() {
+					mui.toast("也没有数据源\t\tT^T");
+				});
+				//
+				document.getElementById("fontSize").addEventListener('tap', function() {
+					mui.toast("暂未开放");
+				});
+				//
+				document.getElementById("about").addEventListener('tap', function() {
+					mui.openWindow({
+						id: 'about',
+						url: 'about.html',
+						show: {
+							duration: 200
+						},
+						waiting: {
+							autoShow: false
+						}
+					});
+				});
+			});
+		</script>
+	</body>
+
+</html>

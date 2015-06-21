@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.part.css" />
+		<style type="text/css">
+			body {
+				background: rgb(240, 240, 240);
+				margin: 15px;
+			}
+			.list-header {
+				margin: 0;
+			}
+			p.title-info {
+				font-size: 0.8em;
+				color: #777777;
+				margin-top: 15px;
+				margin-bottom: 0;
+			}
+			#loadMoreBtn {
+				color: white;
+				background: rgb(210, 34, 34);
+				padding: 10px;
+				text-align: center;
+				border-radius: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="refreshContainer">
+			<p class="list-header" id="lastUpdate">最新更新</p>
+			<div id="loading" style="margin: 10px 0;">
+				<i class="icon-spinner icon-spin icon-2x" style="margin: auto;"></i>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script>
+			var page = 1;
+			mui.plusReady(ready);
+			mui.init({
+				pullRefresh: {
+					container: "#refreshContainer",
+					down: {
+						contentdown: "下拉刷新",
+						contentover: "释放刷新",
+						contentrefresh: "正在刷新",
+						callback: getWapNewsList
+					}
+				}
+			});
+
+			function ready() {
+				// settingsChange listener
+				window.addEventListener('settingsChange', function() {});
+				getWapNewsList();
+			}
+
+			function getWapNewsList() {
+				page = 1;
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4) {
+						if (xmlhttp.status == 200) {
+							var textDoc = xmlhttp.responseText;
+							textDoc = textDoc.replace(/[\s]+/ig, " "); // spaces
+							// textDoc = textDoc.replace(/<script\b[^>]*>[\s\S]*?<\/script>/ig, ""); // js
+							/* generate ul */
+							var ulNewsList = document.createElement("ul");
+							ulNewsList.className = "round-list-group";
+							/* */
+							var textEntrys = extractNodeValue(textDoc, '<ul id="wapindexnewlist">', '</ul>');
+							while (textEntrys.indexOf('<li>') != -1) {
+								var text_A_Entry = extractNodeValue(textEntrys, '<li>', '</li>');
+								textEntrys = textEntrys.slice(textEntrys.indexOf('</li>') + 5, textEntrys.length);
+								/* generate li */
+								var liEntry = document.createElement("li");
+								liEntry.className = "round-list-group-item";
+								liEntry.id = extractNodeValue(text_A_Entry, '<a href="/html/', '.htm">');
+								/* */
+								var pTitle = document.createElement("p");
+								pTitle.innerHTML = extractNodeValue(text_A_Entry, '<span class="title">', '</span>');
+								/* */
+								var pDate = document.createElement("p");
+								var dateText = extractNodeValue(text_A_Entry, '<span class="date"> <script>jsDateDiff(\'', '\')<\/script>');
+								pDate.innerHTML = renderTime(dateText);
+								pDate.className = "title-info";
+								/* listener */
+								liEntry.addEventListener('tap', function() {
+										mui.openWindow({
+											id: 'detail',
+											url: 'newsViewHeader.html',
+											extras: {
+												newsId: this.id
+											},
+											show: {
+												duration: 200
+											},
+											waiting: {
+												autoShow: false
+											}
+										});
+									})
+									/* */
+								liEntry.appendChild(pTitle);
+								liEntry.appendChild(pDate);
+								ulNewsList.appendChild(liEntry);
+							}
+							var loadMoreBtn = document.createElement("div");
+							loadMoreBtn.id = "loadMoreBtn";
+							loadMoreBtn.className = "pressable";
+							loadMoreBtn.innerHTML = "<span>加载更多<span>";
+							loadMoreBtn.addEventListener('tap', function() {
+								this.innerHTML += "&nbsp;<i class='icon-spinner icon-spin' id='loadCommsIcon'></i>";
+								loadMoreNews(ulNewsList);
+							});
+							/* */
+							document.getElementById("refreshContainer").appendChild(ulNewsList);
+							document.getElementById("refreshContainer").appendChild(loadMoreBtn);
+							if (document.getElementById("loading")) {
+								document.getElementById("refreshContainer").removeChild(document.getElementById("loading"));
+							}
+							if (document.getElementById("refreshContainer").childElementCount > 3) {
+								document.getElementById("refreshContainer").removeChild(document.getElementById("refreshContainer").lastChild.previousElementSibling.previousElementSibling);
+								document.getElementById("refreshContainer").removeChild(document.getElementById("refreshContainer").lastChild.previousElementSibling.previousElementSibling);
+							}
+						} else {
+							mui.toast('网络似乎有问题');
+							if (document.getElementById("loading")) {
+								document.getElementById("refreshContainer").removeChild(document.getElementById("loading"));
+							}
+						}
+						mui('#pullrefreshContainer').pullRefresh().endPulldownToRefresh();
+					}
+				}
+				xmlhttp.open("GET", "http://wap.ithome.com/", true);
+				xmlhttp.send();
+			}
+
+			function extractNodeValue(contentText, startString, endString) {
+				var value = "";
+				if (contentText.indexOf(startString) != -1) {
+					// console.log('find start string: ' + startString + ' at ' + contentText.indexOf(startString));
+					var start = contentText.indexOf(startString);
+					temp = contentText.slice(start + startString.length, contentText.length);
+					if (contentText.indexOf(endString) != -1) {
+						// console.log('find end string: ' + endString + ' at ' + contentText.indexOf(endString));
+						var end = temp.indexOf(endString);
+						value = temp.slice(0, end).trim();
+					}
+				}
+				return value.trim();
+			}
+
+			function renderTime(pubTime) {
+				var time = "更早";
+				pubTime = pubTime.replace(/[:-]/ig, " ");
+				var pubTimes = pubTime.split(" ");
+				var now = new Date();
+				if (pubTimes[0] == now.getFullYear()) {
+					if (pubTimes[1] == now.getMonth() + 1) {
+						if (pubTimes[2] == now.getDate()) {
+							if (pubTimes[3] == now.getHours()) {
+								if (pubTimes[4] == now.getMinutes()) {
+									return (now.getSeconds() - pubTimes[5]).toString() + "秒前";
+								} else {
+									return (now.getMinutes() - pubTimes[4]).toString() + "分钟前";
+								}
+							} else {
+								return (now.getHours() - pubTimes[3]).toString() + "小时前";
+							}
+						} else {
+							return (now.getDate() - pubTimes[2]).toString() + "天前";
+						}
+					}
+				}
+				return time;
+			}
+
+			function loadMoreNews(ul) {
+				page++;
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4) {
+						if (xmlhttp.status == 200) {
+							var textDoc = xmlhttp.responseText;
+							textDoc = textDoc.replace(/[\s]+/ig, " "); // spaces
+							/* */
+							var textEntrys = textDoc;
+							while (textEntrys.indexOf('<li>') != -1) {
+								var text_A_Entry = extractNodeValue(textEntrys, '<li>', '</li>');
+								textEntrys = textEntrys.slice(textEntrys.indexOf('</li>') + 5, textEntrys.length);
+								/* generate li */
+								var liEntry = document.createElement("li");
+								liEntry.className = "round-list-group-item";
+								liEntry.id = extractNodeValue(text_A_Entry, '<a href="/html/', '.htm">');
+								/* */
+								var pTitle = document.createElement("p");
+								pTitle.innerHTML = extractNodeValue(text_A_Entry, '<span class="title">', '</span>');
+								/* */
+								var pDate = document.createElement("p");
+								var dateText = extractNodeValue(text_A_Entry, '<span class="date"> <script>jsDateDiff(\'', '\')<\/script>');
+								pDate.innerHTML = renderTime(dateText);
+								pDate.className = "title-info";
+								/* listener */
+								liEntry.addEventListener('tap', function() {
+										mui.openWindow({
+											id: 'detail',
+											url: 'newsViewHeader.html',
+											extras: {
+												newsId: this.id
+											},
+											show: {
+												duration: 200
+											},
+											waiting: {
+												autoShow: false
+											}
+										});
+									})
+									/* */
+								liEntry.appendChild(pTitle);
+								liEntry.appendChild(pDate);
+								ul.appendChild(liEntry);
+								document.getElementById("loadMoreBtn").innerHTML = "加载更多";
+							}
+						} else {
+							mui.toast('网络似乎有问题');
+						}
+					}
+				}
+				xmlhttp.open("GET", "http://wap.ithome.com/ithome/getajaxdata.aspx?page=" + page + "&type=wapcategorypage&pagelength=20&randnum=" + Math.random(), true);
+				xmlhttp.send();
+			}
+		</script>
+	</body>
+
+</html>

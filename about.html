@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!--<link rel="stylesheet" type="text/css" href="css/mui.min.css"/>-->
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.part.css" />
+		<style type="text/css">
+			body {
+				overflow: hidden;
+			}
+			.container {
+				margin: 15px;
+				font-size: 0.9em;
+				color: rgb(150, 150, 150);
+			}
+			p.title {
+				margin: 0;
+				font-size: 1.3em;
+				text-indent: 0;
+				color: black;
+			}
+			p {
+				margin: 5px 0;
+				text-indent: 30px;
+			}
+			ul {
+				margin-left: -20px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="navbar" style="position: static;">
+			<div class="nav-btn-style mui-action-back horizontal-margin15">
+				<i class="icon-angle-left"> 设置</i>
+			</div>
+		</header>
+		<div class="container">
+			<p class="title">关于</p>
+			<p>版本 0.31</p>
+			<p>采用HTML5+规范，使用HTML，JavaScript，CSS编写，目前可跨Android，IOS平台。</p>
+			<br />
+			<p class="title">功能</p>
+			<ul>
+				<li>
+					获取IT之家新闻
+					<ul>
+						<li>新闻列表（下拉刷新）</li>
+						<li>加载评论（可选）</li>
+					</ul>
+				</li>
+				<li>分享新闻链接</li>
+				<li>基本界面布局</li>
+			</ul>
+			<br />
+			<p class="title">联系方式</p>
+			<p>2814533869@qq.com</p>
+			<br />
+			<p class="title">感谢</p>
+			<p>“做最好的HTML5开发工具”——<a href="http://www.dcloud.io/">HBuilder</a>；</p>
+			<p>“最接近原生APP体验的高性能前端框架”——<a href="http://dcloudio.github.io/mui/">MUI</a>。</p>
+		</div>
+		<script src="js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			//处理点击事件，需要打开原生浏览器
+			mui('body').on('tap', 'a', function(e) {
+				var href = this.getAttribute('href');
+				if (href) {
+					if (window.plus) {
+						plus.runtime.openURL(href);
+					} else {
+						location.href = href;
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>
