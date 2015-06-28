@@ -14,7 +14,7 @@ a {
 	tap-highlight-color: rgba(0, 0, 0, 0)
 }
 p {
-	margin: 15px 0;
+	margin: 16px 0;
 }
 span {
 	margin: 0;
@@ -30,8 +30,8 @@ hr {
 	border-left: 5px solid;
 	border-color: rgb(210, 34, 34);
 }
-.horizontal-margin15 > i {
-	margin: 0 15px;
+.horizontal-margin16 > i {
+	margin: 0 16px;
 }
 .navbar {
 	position: absolute;
@@ -41,8 +41,8 @@ hr {
 	z-index: 10;
 	/* */
 	
-	height: 50px;
-	line-height: 50px;
+	height: 56px;
+	line-height: 56px;
 	/* */
 	
 	color: white;
@@ -50,7 +50,7 @@ hr {
 	font-size: 20px;
 }
 .navbar ~ .mui-content .mui-pull-top-pocket {
-	top: 50px;
+	top: 56px;
 }
 .round-list-group {
 	margin: 0;
@@ -59,23 +59,17 @@ hr {
 .round-list-group-item {
 	position: relative;
 	display: block;
-	padding: 15px;
-	margin: 10px 0;
+	padding: 16px;
+	margin: 8px 0;
 	background-color: white;
 	border: 1px solid rgb(238, 238, 238);
 	border-radius: 5px;
-	/* */
-	
-	transition: .1s ease-out;
-	transition-property: background-color, border-color;
 }
 .round-list-group-item:active {
 	background: rgb(238, 238, 238);
 	border-color: rgb(200, 200, 200);
 }
-.round-list-group-item div {
-	margin: 0;
-}
+.round-list-group-item div,
 .round-list-group-item p {
 	margin: 0;
 }
@@ -87,14 +81,14 @@ hr {
 .list-group-item {
 	position: relative;
 	display: block;
-	padding: 15px;
+	padding: 16px;
 	margin: 0;
 	margin-top: -1px;
 	background-color: white;
 	border: 1px solid rgb(238, 238, 238);
 }
 .nav-btn-style {
-	height: 50px;
+	height: 56px;
 	display: inline-block;
 	transition: .1s ease-out;
 	transition-property: background-color;
